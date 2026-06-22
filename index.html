@@ -92,38 +92,40 @@
         <div class="logo-area">Groww<span class="logo-dot">.</span></div>
         <div class="spinner"></div>
         <h2>Opening Groww App</h2>
-        <p>Connecting securely. If the app does not load automatically in a few seconds, use the link below.</p>
-        <a href="groww://dashboard" id="main-cta" class="btn">Launch App Manually</a>
+        <p>Connecting securely. If the app does not load automatically, tap below.</p>
+        <a href="#" id="main-cta" class="btn">Launch App Manually</a>
     </div>
 
     <script>
-        // 1. Define target destinations
         const webUrl = "https://groww.in"; 
-        const appScheme = "groww://dashboard";
-        const playStoreUrl = "https://google.com";
+        const playStoreUrl = "https://play.google.com/store/apps/details?id=com.nextbillion.groww";
         const appStoreUrl = "https://apple.com";
 
-        // 2. Identify user platform environment
+        // Modern intent string syntax prevents the browser from showing a 404 error page.
+        // It tells Android Chrome to look directly for the package ID if the scheme fails.
+        const androidIntent = "intent://dashboard/#Intent;scheme=groww;package=com.nextbillion.groww;S.browser_fallback_url=" + encodeURIComponent(playStoreUrl) + ";end;";
+        const iosScheme = "groww://dashboard";
+
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isAndroid = /android/i.test(userAgent);
         const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
 
-        // 3. Conditional execution routing engine
         if (!isAndroid && !isIOS) {
-            // DESKTOP: Bypass entirely and send immediately to website
+            // 1. DESKTOP: Redirect to browser web panel instantly
             window.location.replace(webUrl);
-        } else {
-            // MOBILE: Trigger intent system routing
-            window.location.href = appScheme;
+        } else if (isAndroid) {
+            // 2. ANDROID: Apply Android Intent string to bypass 404 rules
+            document.getElementById('main-cta').href = androidIntent;
+            window.location.href = androidIntent;
+        } else if (isIOS) {
+            // 3. IOS: Use custom protocol mapping
+            document.getElementById('main-cta').href = iosScheme;
+            window.location.href = iosScheme;
 
-            // Determine appropriate store fallback if the app isn't installed
-            const fallbackStore = isAndroid ? playStoreUrl : appStoreUrl;
-
-            // Fallback mechanism if user remains stuck on the webpage
+            // iOS Fallback trigger strategy
             setTimeout(function() {
-                const ctaButton = document.getElementById('main-cta');
-                ctaButton.innerText = "Install Groww App";
-                ctaButton.href = fallbackStore;
+                // If user is still here after 2.5 seconds, direct to App Store
+                window.location.href = appStoreUrl;
             }, 2500);
         }
     </script>
