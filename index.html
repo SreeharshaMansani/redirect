@@ -31,33 +31,19 @@
             max-width: 400px;
             width: 90%;
         }
-        .logo-area {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 20px;
-        }
+        .logo-area { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 20px; }
         .logo-dot { color: var(--primary-accent); }
         h2 { font-size: 22px; margin-bottom: 10px; }
-        p {
-            color: var(--text-muted);
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 30px;
-        }
+        p { color: var(--text-muted); font-size: 14px; line-height: 1.5; margin-bottom: 30px; }
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border: 4px solid rgba(255,255,255,0.1);
             border-top: 4px solid var(--primary-accent);
             border-radius: 50%;
             margin: 0 auto 30px auto;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .btn {
             display: inline-block;
             background-color: var(--primary-accent);
@@ -80,7 +66,7 @@
     <div class="spinner"></div>
     <h2>Opening Groww App</h2>
     <p>Connecting securely. If the app does not open, tap below.</p>
-    <button class="btn" id="main-cta" onclick="openApp()">Open Groww App</button>
+    <button class="btn" onclick="goToPlayStore()">Open on Play Store</button>
 </div>
 
 <script>
@@ -92,62 +78,62 @@
     const isAndroid = /android/i.test(ua);
     const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
 
-    function openApp() {
-        if (isAndroid) {
-            tryAndroidOpen();
-        } else if (isIOS) {
-            tryIOSOpen();
-        } else {
-            window.location.href = webUrl;
-        }
+    function goToPlayStore() {
+        window.location.href = playStoreUrl;
     }
 
     function tryAndroidOpen() {
-        // Intent URL: if app not installed, Android will auto-redirect to Play Store
+        // Step 1: Try custom scheme first (opens app if installed)
+        // The intent fallback URL is Play Store — so if app not found, Android sends to Play Store automatically
         const intentUrl = "intent://dashboard/#Intent;scheme=groww;package=com.nextbillion.groww;S.browser_fallback_url=" + encodeURIComponent(playStoreUrl) + ";end";
 
-        let appOpened = false;
+        // Track if user left the page (= app opened)
+        let leftPage = false;
 
-        // If app opens, page becomes hidden
-        window.addEventListener("pagehide", () => { appOpened = true; });
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) appOpened = true;
-        });
+        const onHide = () => { leftPage = true; };
+        document.addEventListener("visibilitychange", onHide);
+        window.addEventListener("pagehide", onHide);
+        window.addEventListener("blur", onHide);
 
-        // Try the intent URL
+        // Fire the intent
         window.location.href = intentUrl;
 
-        // After 2.5s, if still here, go to Play Store
+        // Wait long enough for the OS to switch apps
+        // If still on page after 3s, app is NOT installed — go to Play Store
         setTimeout(() => {
-            if (!appOpened) {
+            document.removeEventListener("visibilitychange", onHide);
+            window.removeEventListener("pagehide", onHide);
+            window.removeEventListener("blur", onHide);
+
+            if (!leftPage && !document.hidden) {
                 window.location.href = playStoreUrl;
             }
-        }, 2500);
+        }, 3000);
     }
 
     function tryIOSOpen() {
-        let appOpened = false;
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) appOpened = true;
-        });
+        let leftPage = false;
+        const onHide = () => { leftPage = true; };
+        document.addEventListener("visibilitychange", onHide);
+        window.addEventListener("pagehide", onHide);
 
         window.location.href = "groww://dashboard";
 
         setTimeout(() => {
-            if (!appOpened) {
+            if (!leftPage && !document.hidden) {
                 window.location.href = appStoreUrl;
             }
-        }, 2500);
+        }, 3000);
     }
 
-    // Auto-trigger on load
     window.addEventListener("load", () => {
         if (!isAndroid && !isIOS) {
-            // Desktop: go straight to website
             window.location.replace(webUrl);
-        } else {
-            // Mobile: try auto-open after short delay
-            setTimeout(openApp, 800);
+        } else if (isAndroid) {
+            // Small delay so page renders first, then fire intent
+            setTimeout(tryAndroidOpen, 500);
+        } else if (isIOS) {
+            setTimeout(tryIOSOpen, 500);
         }
     });
 </script>
