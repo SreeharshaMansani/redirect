@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Opening Groww...</title>
     <style>
-        /* Groww Brand Inspired Palette */
         :root {
-            --bg-color: #0f172a;       /* Deep dark background */
-            --card-color: #1e293b;     /* Slate dark card background */
-            --primary-accent: #00d09c; /* Groww Trademark Mint Green */
+            --bg-color: #0f172a;       
+            --card-color: #1e293b;     
+            --primary-accent: #00d09c; 
             --text-main: #ffffff;
             --text-muted: #94a3b8;
         }
@@ -40,7 +39,6 @@
             font-weight: 700;
             letter-spacing: -0.5px;
             margin-bottom: 20px;
-            color: var(--text-main);
         }
 
         .logo-dot {
@@ -59,7 +57,6 @@
             margin-bottom: 30px;
         }
 
-        /* Loading Spinner Animation */
         .spinner {
             width: 40px;
             height: 40px;
@@ -75,7 +72,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Action Buttons */
         .btn {
             display: inline-block;
             background-color: var(--primary-accent);
@@ -85,20 +81,8 @@
             padding: 14px 28px;
             border-radius: 8px;
             font-size: 15px;
-            transition: opacity 0.2s ease;
             width: 100%;
             box-sizing: border-box;
-            margin-bottom: 12px;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--primary-accent);
-            border: 1px solid var(--primary-accent);
         }
     </style>
 </head>
@@ -106,50 +90,42 @@
 
     <div class="container">
         <div class="logo-area">Groww<span class="logo-dot">.</span></div>
-        
         <div class="spinner"></div>
-        
         <h2>Opening Groww App</h2>
-        <p>We are securely redirecting you to your dashboard. If your app doesn't open automatically, use the choices below.</p>
-
-        <!-- Dynamic Action Button -->
+        <p>Connecting securely. If the app does not load automatically in a few seconds, use the link below.</p>
         <a href="groww://dashboard" id="main-cta" class="btn">Launch App Manually</a>
-        
-        <!-- App Store/Play Store fallback options -->
-        <a href="https://groww.in/" target="_blank" class="btn btn-secondary">Go to Groww Web</a>
     </div>
 
     <script>
-        // Extract routing information from URL queries if needed (e.g. ?target=stocks)
-        const urlParams = new URLSearchParams(window.location.search);
-        const routeTarget = urlParams.get('target') || 'dashboard';
-
-        // 1. Build your custom application scheme path
-        const growwAppScheme = `groww://${routeTarget}`; 
-
-        // 2. Define App Store URLs as variables
+        // 1. Define target destinations
+        const webUrl = "https://groww.in"; 
+        const appScheme = "groww://dashboard";
         const playStoreUrl = "https://google.com";
         const appStoreUrl = "https://apple.com";
 
-        // 3. Detect operating system environment
+        // 2. Identify user platform environment
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        let finalFallbackStore = "https://groww.in/";
+        const isAndroid = /android/i.test(userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
 
-        if (/android/i.test(userAgent)) {
-            finalFallbackStore = playStoreUrl;
-        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-            finalFallbackStore = appStoreUrl;
+        // 3. Conditional execution routing engine
+        if (!isAndroid && !isIOS) {
+            // DESKTOP: Bypass entirely and send immediately to website
+            window.location.replace(webUrl);
+        } else {
+            // MOBILE: Trigger intent system routing
+            window.location.href = appScheme;
+
+            // Determine appropriate store fallback if the app isn't installed
+            const fallbackStore = isAndroid ? playStoreUrl : appStoreUrl;
+
+            // Fallback mechanism if user remains stuck on the webpage
+            setTimeout(function() {
+                const ctaButton = document.getElementById('main-cta');
+                ctaButton.innerText = "Install Groww App";
+                ctaButton.href = fallbackStore;
+            }, 2500);
         }
-
-        // 4. Force browser redirect execution to the app
-        window.location.href = growwAppScheme;
-
-        // 5. Fail-Safe: If the client stays on page for 2.5s, swap the primary CTA to download the app
-        setTimeout(function() {
-            const ctaButton = document.getElementById('main-cta');
-            ctaButton.innerText = "Install Groww App";
-            ctaButton.href = finalFallbackStore;
-        }, 2500);
     </script>
 </body>
 </html>
