@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening Groww...</title>
+    <style>
+        /* Groww Brand Inspired Palette */
+        :root {
+            --bg-color: #0f172a;       /* Deep dark background */
+            --card-color: #1e293b;     /* Slate dark card background */
+            --primary-accent: #00d09c; /* Groww Trademark Mint Green */
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            background-color: var(--card-color);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .logo-area {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .logo-dot {
+            color: var(--primary-accent);
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        /* Loading Spinner Animation */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary-accent);
+            border-radius: 50%;
+            margin: 0 auto 30px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Action Buttons */
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-accent);
+            color: #000000;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: opacity 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-accent);
+            border: 1px solid var(--primary-accent);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo-area">Groww<span class="logo-dot">.</span></div>
+        
+        <div class="spinner"></div>
+        
+        <h2>Opening Groww App</h2>
+        <p>We are securely redirecting you to your dashboard. If your app doesn't open automatically, use the choices below.</p>
+
+        <!-- Dynamic Action Button -->
+        <a href="groww://dashboard" id="main-cta" class="btn">Launch App Manually</a>
+        
+        <!-- App Store/Play Store fallback options -->
+        <a href="https://groww.in/" target="_blank" class="btn btn-secondary">Go to Groww Web</a>
+    </div>
+
+    <script>
+        // Extract routing information from URL queries if needed (e.g. ?target=stocks)
+        const urlParams = new URLSearchParams(window.location.search);
+        const routeTarget = urlParams.get('target') || 'dashboard';
+
+        // 1. Build your custom application scheme path
+        const growwAppScheme = `groww://${routeTarget}`; 
+
+        // 2. Define App Store URLs as variables
+        const playStoreUrl = "https://google.com";
+        const appStoreUrl = "https://apple.com";
+
+        // 3. Detect operating system environment
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        let finalFallbackStore = "https://groww.in/";
+
+        if (/android/i.test(userAgent)) {
+            finalFallbackStore = playStoreUrl;
+        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            finalFallbackStore = appStoreUrl;
+        }
+
+        // 4. Force browser redirect execution to the app
+        window.location.href = growwAppScheme;
+
+        // 5. Fail-Safe: If the client stays on page for 2.5s, swap the primary CTA to download the app
+        setTimeout(function() {
+            const ctaButton = document.getElementById('main-cta');
+            ctaButton.innerText = "Install Groww App";
+            ctaButton.href = finalFallbackStore;
+        }, 2500);
+    </script>
+</body>
+</html>
