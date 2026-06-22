@@ -85,7 +85,7 @@
     function tryAndroidOpen() {
         // Step 1: Try custom scheme first (opens app if installed)
         // The intent fallback URL is Play Store — so if app not found, Android sends to Play Store automatically
-        const intentUrl = "intent://dashboard/#Intent;scheme=groww;package=com.nextbillion.groww;S.browser_fallback_url=" + encodeURIComponent(playStoreUrl) + ";end";
+        const intentUrl = "https://groww.in/stocks/";
 
         // Track if user left the page (= app opened)
         let leftPage = false;
